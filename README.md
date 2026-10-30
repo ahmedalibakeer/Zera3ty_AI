@@ -8,14 +8,14 @@
 
 - **Auth:** Supabase Auth بالبريد وكلمة المرور، مع تأكيد البريد واستعادة كلمة المرور.
 - **البيانات والصلاحيات:** PostgreSQL وRLS؛ كل مستخدم يرى ملفه واشتراكه وصوره وردوده فقط.
-- **الصور:** Bucket خاص `plant-submissions`. يمر الرفع عبر Route خادمي يتحقق من الحجم وبصمة JPG/PNG/WEBP ثم يرفع بخدمة Storage إدارية server-only؛ صلاحية الرفع غير متاحة للمتصفح. روابط العرض مؤقتة وموقعة.
+- **الصور:** Bucket خاص `plant-submissions`. يمر الرفع عبر Route خادمي يتحقق من الحجم وبصمة JPG/PNG/WEBP ثم يرفع بجلسة المستخدم؛ سياسة Storage تسمح لكل مستخدم بمجلده فقط، وروابط العرض مؤقتة وموقعة.
 - **الإدارة:** الدور `profiles.role` يتحقق منه الخادم في كل صفحة إدارة وAPI؛ لا يمكن للمستخدم ترقية نفسه. لا توجد Service Role Key في المتصفح.
 - **البريد:** Resend اختياري. يسجل النظام حالة الإرسال لكل رد ويستخدم مفتاح idempotency لمنع إنشاء الرد نفسه مرتين عند إعادة الطلب.
 
 ## التشغيل محليًا
 
 1. ثبّت Node.js 20.9 أو أحدث.
-2. انسخ `.env.example` إلى `.env.local` وأدخل عنوان مشروع Supabase ومفتاح `anon` العام ومفتاح `service_role` في الخادم فقط. لا تضع `SUPABASE_SERVICE_ROLE_KEY` في إعدادات `NEXT_PUBLIC_*` أو داخل المتصفح.
+2. انسخ `.env.example` إلى `.env.local` وأدخل عنوان مشروع Supabase والمفتاح العام `publishable` (أو `anon` القديم) في المتغير `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 3. نفّذ `supabase/schema.sql` في SQL Editor داخل مشروع Supabase.
 4. في Supabase Auth، فعّل Email provider وأضف `http://localhost:3000/auth/callback` إلى Redirect URLs.
 5. نفّذ `npm install` ثم `npm run dev` وافتح `http://localhost:3000`.
@@ -41,9 +41,7 @@ where email = 'admin@example.com';
 
 ## النشر
 
-المستودع موجود على GitHub على الفرع `codex/zera3ty-ai-mvp`. أنشئ مشروعًا في Vercel واربط هذا المستودع والفرع، ثم أضف المتغيرات الموجودة في `.env.example` إلى إعدادات Production وPreview. أضف عنوان النشر إلى Supabase Auth Site URL وRedirect URLs، مثل `https://zera3ty-ai.vercel.app/auth/callback`. شغّل Production Build من إعدادات Vercel.
-
-الموقع لم يُنشر بعد ولم يُربط بمشروع Supabase/Vercel، لذلك لا يوجد رابط تشغيل عام أو اختبار تكامل حي حتى الآن. يلزم إعداد المشاريع الخارجية ومتغيرات البيئة قبل تفعيل ذلك. خطة Supabase المجانية لها حدود استخدام وتوفر؛ تحقق من حدود الخطة الحالية قبل الإطلاق التجاري.
+المستودع موجود على GitHub على الفرع `codex/zera3ty-ai-mvp` ومربوط بمشروع Vercel. يتطلب تشغيل الإنتاج إعداد `NEXT_PUBLIC_SUPABASE_URL` و`NEXT_PUBLIC_SUPABASE_ANON_KEY` في بيئات Vercel ثم نشرًا جديدًا. أضف عنوان الإنتاج إلى Supabase Auth Site URL وRedirect URLs، مثل `https://zera3ty-ai.vercel.app/auth/callback`.
 
 ## الوظائف الحالية
 
@@ -71,3 +69,4 @@ npm run dev
 npm run build
 npm start
 ```
+

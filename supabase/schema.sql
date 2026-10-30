@@ -153,6 +153,8 @@ on conflict (id) do update set public = false, file_size_limit = 5242880,
 
 create policy "users read own images and admins read all" on storage.objects for select to authenticated
   using (bucket_id = 'plant-submissions' and ((storage.foldername(name))[1] = (select auth.uid())::text or (select public.is_admin())));
+create policy "users upload own images" on storage.objects for insert to authenticated
+  with check (bucket_id = 'plant-submissions' and (storage.foldername(name))[1] = (select auth.uid())::text);
 create policy "users delete own images" on storage.objects for delete to authenticated
   using (bucket_id = 'plant-submissions' and (storage.foldername(name))[1] = (select auth.uid())::text);
 
@@ -165,3 +167,4 @@ do $$ begin
     alter publication supabase_realtime add table public.replies;
   end if;
 end $$;
+
