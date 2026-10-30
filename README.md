@@ -1,6 +1,6 @@
 # Zera3ty AI
 
-منصة عربية RTL لاستقبال صور النباتات ومتابعة الحالات والتواصل مع فريق زراعتي. التطبيق مبني بـ Next.js 15 وReact 19 وTailwind CSS 4 وSupabase.
+منصة عربية RTL لاستقبال صور النباتات ومتابعة الحالات والتواصل مع فريق زراعتي. التطبيق مبني بـ Next.js 15 وReact 19 وTailwind CSS 3 وSupabase.
 
 ## المعمارية
 
@@ -41,7 +41,7 @@ where email = 'admin@example.com';
 
 ## النشر
 
-أنشئ مشروعًا في Vercel واربط مستودع GitHub، ثم أضف المتغيرات الموجودة في `.env.example` إلى إعدادات Production وPreview. أضف عنوان النشر إلى Supabase Auth Site URL وRedirect URLs، مثل `https://zera3ty-ai.vercel.app/auth/callback`. شغّل Production Build من إعدادات Vercel.
+المستودع موجود على GitHub على الفرع `codex/zera3ty-ai-mvp`. أنشئ مشروعًا في Vercel واربط هذا المستودع والفرع، ثم أضف المتغيرات الموجودة في `.env.example` إلى إعدادات Production وPreview. أضف عنوان النشر إلى Supabase Auth Site URL وRedirect URLs، مثل `https://zera3ty-ai.vercel.app/auth/callback`. شغّل Production Build من إعدادات Vercel.
 
 الموقع لم يُنشر بعد ولم يُربط بمشروع Supabase/Vercel، لذلك لا يوجد رابط تشغيل عام أو اختبار تكامل حي حتى الآن. يلزم إعداد المشاريع الخارجية ومتغيرات البيئة قبل تفعيل ذلك. خطة Supabase المجانية لها حدود استخدام وتوفر؛ تحقق من حدود الخطة الحالية قبل الإطلاق التجاري.
 
@@ -57,7 +57,7 @@ where email = 'admin@example.com';
 
 ## ما يحتاج إعدادًا أو مراجعة قبل الإطلاق
 
-- إنشاء وربط مشاريع Supabase وGitHub وVercel وإضافة متغيرات البيئة.
+- إنشاء وربط مشروع Supabase ومشروع Vercel وإضافة متغيرات البيئة.
 - ترقية أول مسؤول يدويًا، وضبط روابط Auth والنطاق النهائي.
 - إعداد Resend والتحقق من النطاق لاختبار البريد.
 - Rate limit رسائل التواصل الحالي داخل الذاكرة؛ في Vercel يحتاج إلى خدمة مشتركة مثل Upstash أو بوابة حماية قبل حملة عامة.
