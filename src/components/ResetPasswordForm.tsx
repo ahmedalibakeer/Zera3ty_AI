@@ -1,0 +1,4 @@
+"use client";
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+export default function ResetPasswordForm(){const [password,setPassword]=useState("");const [message,setMessage]=useState("");const [busy,setBusy]=useState(false);async function submit(e:React.FormEvent){e.preventDefault();setBusy(true);const {error}=await createClient().auth.updateUser({password});setBusy(false);setMessage(error?error.message:"تم تحديث كلمة المرور. يمكنك تسجيل الدخول الآن.");}return <form onSubmit={submit} className="space-y-5"><div><label className="label">كلمة المرور الجديدة</label><input className="input" type="password" value={password} onChange={e=>setPassword(e.target.value)} minLength={8} required/></div><button disabled={busy} className="btn btn-primary w-full">{busy?"جارٍ الحفظ...":"تحديث كلمة المرور"}</button>{message&&<p role="status" className="text-sm text-[#236b43]">{message}</p>}</form>}

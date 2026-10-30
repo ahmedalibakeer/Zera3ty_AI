@@ -1,0 +1,6 @@
+import { Brand } from "@/components/Header";
+import Link from "next/link";
+
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  return <main className="grid min-h-screen bg-[#f7f8f2] lg:grid-cols-2"><section className="relative hidden overflow-hidden bg-cover bg-center lg:block" style={{backgroundImage:"linear-gradient(0deg,#143c26b0,#143c2630),url(https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1200&q=85)"}}><div className="absolute inset-x-10 top-10 text-white"><Brand/></div><div className="absolute bottom-14 right-12 left-12 text-white"><p className="text-4xl font-black leading-tight">كل نبتة تستحق<br/>فرصة للنمو.</p><p className="mt-4 text-white/80">مساحة واحدة لمتابعة نباتاتك والتواصل مع فريقنا.</p></div></section><section className="flex flex-col items-center justify-center p-5 sm:p-10"><div className="mb-10 lg:hidden"><Brand/></div><div className="w-full max-w-md rounded-[28px] bg-white p-7 shadow-[0_22px_70px_#183c1f0b] sm:p-10"><Link href="/" className="mb-9 inline-flex text-sm text-[#6d7b72]">← العودة للرئيسية</Link>{children}</div><p className="mt-7 text-center text-xs text-[#7c887f]">بحسابك، أنت توافق على <Link href="/privacy" className="underline">سياسة الخصوصية</Link>.</p></section></main>;
+}

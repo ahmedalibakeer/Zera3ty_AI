@@ -1,0 +1,6 @@
+import {redirect} from "next/navigation";
+import {isAdmin} from "@/lib/supabase/server";
+import {formatDate} from "@/lib/utils";
+import AdminNav from "@/components/AdminNav";
+export const dynamic="force-dynamic";
+export default async function MessagesPage(){const {supabase,user,admin}=await isAdmin();if(!user)redirect("/login?next=%2Fadmin%2Fmessages");if(!admin)redirect("/account");const {data}=await supabase.from("contact_messages").select("id,name,email,message,created_at").order("created_at",{ascending:false}).limit(100);return <main className="min-h-screen bg-[#f7f8f2]"><AdminNav/><div className="container py-9"><p className="text-sm font-bold text-[#236b43]">الإدارة</p><h1 className="mb-6 mt-1 text-3xl font-black">رسائل التواصل</h1><div className="space-y-4">{(data||[]).map(row=><article key={row.id} className="card p-5"><div className="flex flex-wrap justify-between gap-2"><div><h2 className="font-bold">{row.name}</h2><a className="mt-1 block text-sm text-[#236b43]" href={`mailto:${row.email}`}>{row.email}</a></div><time className="text-xs text-[#829087]">{formatDate(row.created_at)}</time></div><p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[#53645a]">{row.message}</p></article>)}{!data?.length&&<div className="card p-10 text-center text-[#79867d]">لا توجد رسائل حتى الآن.</div>}</div></div></main>}
