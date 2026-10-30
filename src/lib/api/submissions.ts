@@ -32,3 +32,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, id: data.id });
   } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "تعذر رفع الصورة." }, { status: 500 }); }
 }
+

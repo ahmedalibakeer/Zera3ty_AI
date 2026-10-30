@@ -22,3 +22,4 @@ update public.profiles set role = 'admin' where email = 'admin@example.com';
 ## Realtime
 
 يضيف المخطط `submissions` و`replies` إلى منشور `supabase_realtime`. يستقبل التطبيق إشعارات التغيير من القاعدة ويعيد تحميل البيانات من خلال جلسة المستخدم، فتظل سياسات RLS فعالة. في حال كان الجدول موجودًا مسبقًا في المنشور، احذف سطر `alter publication ... add table` المكرر أو تحقّق من إعداد المنشور يدويًا.
+

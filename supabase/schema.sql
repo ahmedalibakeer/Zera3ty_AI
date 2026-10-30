@@ -156,3 +156,4 @@ do $$ begin
     alter publication supabase_realtime add table public.replies;
   end if;
 end $$;
+
