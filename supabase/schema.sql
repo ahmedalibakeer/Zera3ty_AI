@@ -1,5 +1,8 @@
 -- Zera3ty AI: Supabase PostgreSQL schema. Run in the Supabase SQL editor.
 create extension if not exists pgcrypto;
+create schema if not exists private;
+revoke all on schema private from public, anon, authenticated;
+grant usage on schema private to authenticated;
 
 create type public.user_role as enum ('user', 'admin');
 create type public.submission_status as enum ('new', 'reviewing', 'replied');
@@ -84,11 +87,15 @@ create trigger on_auth_user_created after insert on auth.users
 for each row execute procedure public.handle_new_user();
 create trigger on_auth_user_updated after update of email on auth.users
 for each row execute procedure public.handle_user_email_update();
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+revoke all on function public.handle_user_email_update() from public, anon, authenticated;
 
-create or replace function public.is_admin()
+create or replace function private.is_admin()
 returns boolean language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.profiles p where p.id = (select auth.uid()) and p.role = 'admin');
 $$;
+revoke all on function private.is_admin() from public, anon;
+grant execute on function private.is_admin() to authenticated;
 
 create or replace function public.public_stats()
 returns json language sql stable security definer set search_path = '' as $$
@@ -113,37 +120,37 @@ revoke update on public.profiles from authenticated;
 grant update (full_name) on public.profiles to authenticated;
 
 create policy "profiles readable by self or admins" on public.profiles for select to authenticated
-  using (id = (select auth.uid()) or (select public.is_admin()));
+  using (id = (select auth.uid()) or (select private.is_admin()));
 create policy "users update own profile" on public.profiles for update to authenticated
   using (id = (select auth.uid())) with check (id = (select auth.uid()) and role = 'user');
 
 create policy "subscriptions readable by owner or admins" on public.subscriptions for select to authenticated
-  using (user_id = (select auth.uid()) or (select public.is_admin()));
+  using (user_id = (select auth.uid()) or (select private.is_admin()));
 create policy "users subscribe themselves" on public.subscriptions for insert to authenticated
   with check (user_id = (select auth.uid()));
 
 create policy "submissions readable by owner or admins" on public.submissions for select to authenticated
-  using (user_id = (select auth.uid()) or (select public.is_admin()));
+  using (user_id = (select auth.uid()) or (select private.is_admin()));
 create policy "users create own submissions" on public.submissions for insert to authenticated
   with check (user_id = (select auth.uid()) and (storage_path like (select auth.uid())::text || '/%'));
 create policy "admins update submissions" on public.submissions for update to authenticated
-  using ((select public.is_admin())) with check ((select public.is_admin()));
+  using ((select private.is_admin())) with check ((select private.is_admin()));
 
 create policy "replies readable by owner or admins" on public.replies for select to authenticated
-  using ((select public.is_admin()) or exists (select 1 from public.submissions s where s.id = submission_id and s.user_id = (select auth.uid())));
+  using ((select private.is_admin()) or exists (select 1 from public.submissions s where s.id = submission_id and s.user_id = (select auth.uid())));
 create policy "admins create replies" on public.replies for insert to authenticated
-  with check ((select public.is_admin()) and admin_id = (select auth.uid()));
+  with check ((select private.is_admin()) and admin_id = (select auth.uid()));
 create policy "email notifications admins only" on public.email_notifications for select to authenticated
-  using ((select public.is_admin()));
+  using ((select private.is_admin()));
 create policy "admins manage email notifications" on public.email_notifications for insert to authenticated
-  with check ((select public.is_admin()));
+  with check ((select private.is_admin()));
 create policy "admins update email notifications" on public.email_notifications for update to authenticated
-  using ((select public.is_admin())) with check ((select public.is_admin()));
+  using ((select private.is_admin())) with check ((select private.is_admin()));
 
 create policy "contact messages anyone can submit" on public.contact_messages for insert to anon, authenticated
   with check (true);
 create policy "admins read contact messages" on public.contact_messages for select to authenticated
-  using ((select public.is_admin()));
+  using ((select private.is_admin()));
 
 -- Private bucket. The first folder segment must equal the authenticated user id.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
@@ -152,7 +159,7 @@ on conflict (id) do update set public = false, file_size_limit = 5242880,
   allowed_mime_types = array['image/jpeg','image/png','image/webp'];
 
 create policy "users read own images and admins read all" on storage.objects for select to authenticated
-  using (bucket_id = 'plant-submissions' and ((storage.foldername(name))[1] = (select auth.uid())::text or (select public.is_admin())));
+  using (bucket_id = 'plant-submissions' and ((storage.foldername(name))[1] = (select auth.uid())::text or (select private.is_admin())));
 create policy "users upload own images" on storage.objects for insert to authenticated
   with check (bucket_id = 'plant-submissions' and (storage.foldername(name))[1] = (select auth.uid())::text);
 create policy "users delete own images" on storage.objects for delete to authenticated
