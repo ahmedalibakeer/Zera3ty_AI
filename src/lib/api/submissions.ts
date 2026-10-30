@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createStorageAdmin, currentUser } from "@/lib/supabase/server";
+import { currentUser } from "@/lib/supabase/server";
 
 function detectImage(bytes: Uint8Array) {
   if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
@@ -11,7 +11,6 @@ function detectImage(bytes: Uint8Array) {
 export async function POST(request: NextRequest) {
   const { supabase, user } = await currentUser();
   if (!user) return NextResponse.json({ error: "سجّل الدخول قبل رفع الصورة." }, { status: 401 });
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return NextResponse.json({ error: "رفع الصور غير مهيأ بعد. يلزم إعداد مفتاح التخزين على الخادم." }, { status: 503 });
   try {
     const contentLength = Number(request.headers.get("content-length") || 0);
     if (contentLength > 5_500_000) return NextResponse.json({ error: "حجم الطلب يتجاوز الحد المسموح." }, { status: 413 });
@@ -24,12 +23,12 @@ export async function POST(request: NextRequest) {
     const bytes = new Uint8Array(await file.arrayBuffer()); const contentType = detectImage(bytes);
     if (!contentType || contentType !== file.type) return NextResponse.json({ error: "محتوى الصورة لا يطابق صيغة JPG أو PNG أو WEBP المدعومة." }, { status: 400 });
     const ext = contentType === "image/jpeg" ? "jpg" : contentType.split("/")[1]; const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-    const storageAdmin = createStorageAdmin();
-    const { error: uploadError } = await storageAdmin.storage.from("plant-submissions").upload(path, bytes, { contentType, upsert: false });
+    const storage = supabase.storage.from("plant-submissions");
+    const { error: uploadError } = await storage.upload(path, bytes, { contentType, upsert: false });
     if (uploadError) throw uploadError;
     const safeName = file.name.replace(/[\x00-\x1f\\/]/g, "_").slice(0, 255) || `plant.${ext}`;
     const { data, error } = await supabase.from("submissions").insert({ user_id: user.id, storage_path: path, original_name: safeName, content_type: contentType, size_bytes: file.size, description }).select("id").single();
-    if (error) { await storageAdmin.storage.from("plant-submissions").remove([path]); throw error; }
+    if (error) { await storage.remove([path]); throw error; }
     return NextResponse.json({ ok: true, id: data.id });
   } catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "تعذر رفع الصورة." }, { status: 500 }); }
 }

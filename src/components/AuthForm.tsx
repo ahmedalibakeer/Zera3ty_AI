@@ -15,9 +15,11 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" | "forgot"
     try {
       const supabase = createClient();
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: String(form.get("full_name")) }, emailRedirectTo: `${location.origin}/auth/callback?next=/account` } });
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: String(form.get("full_name")) }, emailRedirectTo: `${location.origin}/auth/callback?next=/account` } });
         if (error) throw error;
-        setMessage("تحقق من بريدك الإلكتروني لتأكيد الحساب ثم سجّل الدخول."); setSuccess(true);
+        if (!data.session) throw new Error("تعذر تسجيل الدخول مباشرة. تأكد من إيقاف تأكيد البريد في إعدادات Supabase.");
+        router.push("/account");
+        router.refresh();
       } else if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) throw error;
         const next = params.get("next"); router.push(next?.startsWith("/") && !next.startsWith("//") ? next : "/account"); router.refresh();

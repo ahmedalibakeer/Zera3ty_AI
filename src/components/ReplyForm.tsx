@@ -9,7 +9,7 @@ export default function ReplyForm({ submissionId }: { submissionId: string }) {
     try {
       const response = await fetch("/api/admin/replies", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ submissionId, message, idempotencyKey: key }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.error);
-      setMessage(""); setNotice("تم حفظ الرد. إذا كانت إعدادات Resend مكتملة، أُرسل البريد الإلكتروني أيضًا."); window.location.reload();
+      setMessage(""); setNotice("تم حفظ الرد وسيظهر للمستخدم داخل حسابه."); window.location.reload();
     } catch (error) { setNotice(error instanceof Error ? error.message : "تعذر حفظ الرد."); }
     finally { setBusy(false); }
   }

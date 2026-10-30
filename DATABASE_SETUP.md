@@ -2,16 +2,16 @@
 
 1. أنشئ مشروع Supabase جديدًا من لوحة Supabase.
 2. افتح **SQL Editor** والصق كامل الملف `supabase/schema.sql` ثم نفّذه مرة واحدة.
-3. من Project Settings → API انسخ Project URL و`anon` public key إلى `.env.local`.
+3. من إعدادات المشروع انسخ Project URL و`publishable` public key (أو `anon` القديم) إلى `.env.local` تحت `NEXT_PUBLIC_SUPABASE_URL` و`NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 4. Authentication → URL Configuration: اجعل Site URL هو رابط التطبيق، وأضف `http://localhost:3000/auth/callback` ورابط الإنتاج `/auth/callback` إلى Redirect URLs.
-5. Authentication → Providers: فعّل Email، واضبط تأكيد البريد حسب سياسة الإطلاق.
+5. Authentication → Providers → Email: فعّل Email وأوقف **Confirm email** ليتمكن المستخدم من إنشاء الحساب والدخول مباشرة من دون رسالة تأكيد. البريد لن يكون موثّقًا، واستعادة كلمة المرور ما زالت تعتمد على إرسال بريد Supabase.
 6. راجع Storage وتأكد أن `plant-submissions` خاص، وحجم الملف الأقصى 5MB والأنواع JPG/PNG/WEBP. ينشئ SQL الـBucket والسياسات المطلوبة.
 
-الجداول: `profiles`, `subscriptions`, `submissions`, `replies`, `email_notifications`, `contact_messages`. يربط Trigger كل مستخدم Auth بملف، وتضمن RLS فصل بيانات المستخدمين. يتطلب رفع الصور `SUPABASE_SERVICE_ROLE_KEY` في بيئة الخادم فقط ليتمكن API من فحص الملف قبل التخزين. لا تضف هذا المفتاح إلى متغير `NEXT_PUBLIC_*` أو أي كود متصفح.
+الجداول: `profiles`, `subscriptions`, `submissions`, `replies`, `contact_messages`. يربط Trigger كل مستخدم Auth بملف، وتضمن RLS فصل بيانات المستخدمين. يرفع API الصور بجلسة المستخدم، وتتحقق سياسة Storage من أن مسار الصورة يبدأ بمعرّف المستخدم؛ لا يحتاج التطبيق إلى مفتاح `service_role`.
 
 ## ترقية Admin
 
-أنشئ الحساب وأكد بريده أولًا، ثم نفّذ SQL التالي من لوحة المشروع بصلاحية المالك:
+أنشئ حسابًا من الموقع، ثم نفّذ SQL التالي من لوحة المشروع بصلاحية المالك:
 
 ```sql
 update public.profiles set role = 'admin' where email = 'admin@example.com';
